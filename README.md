@@ -77,3 +77,7 @@ The Instagram-style profile includes a curated **Dids** experience gallery, up t
 Every story and discussion supports Reddit-style replies to replies. Tap **Reply** beneath any comment, add text (optionally anonymously), and post to nest a new reply beneath it. Long conversations are indented and can be collapsed or expanded. Replies can be upvoted. Previously saved flat replies continue to display and can be replied to; new nested replies are saved in the current browser's local storage.
 
 This is still a local demonstration: comments are **not** shared between visitors or synced to a backend.
+
+## One-screen swipe layout (v1.4)
+
+The Swipe screen now uses the available phone viewport instead of a tall fixed-height card. The question, answer controls, and **Read stories** action stay visible together without scrolling on typical phones. Tap the story-count chip on the card or the button beneath Yes/No to open the community. On very small displays, descriptive text is shortened/hidden to prioritize the question and actions. Community stories and long reply threads still scroll normally.
