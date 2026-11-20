@@ -71,3 +71,9 @@ The Instagram-style profile includes a curated **Dids** experience gallery, up t
 - Your other Yes/No answers remain private. Anonymous stories are excluded from the profile preview.
 
 **Prototype privacy note:** This remains a static, browser-only demo. The profile is not publicly accessible to other visitors, Instagram is an external profile link rather than a connected account, and uploaded photos are not sent to a server. Real shared profiles require authentication, storage, permissions, and moderation infrastructure.
+
+## Threaded replies (v1.3)
+
+Every story and discussion supports Reddit-style replies to replies. Tap **Reply** beneath any comment, add text (optionally anonymously), and post to nest a new reply beneath it. Long conversations are indented and can be collapsed or expanded. Replies can be upvoted. Previously saved flat replies continue to display and can be replied to; new nested replies are saved in the current browser's local storage.
+
+This is still a local demonstration: comments are **not** shared between visitors or synced to a backend.
