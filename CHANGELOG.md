@@ -1,3 +1,11 @@
+## 2026-11-20 — One-screen swiping (v1.4)
+
+- Made the swipe card stretch to the available phone-screen height rather than forcing the action buttons below the fold.
+- Kept Yes/No, Skip, Save, and Read stories inside the visible Swipe area.
+- Made story count on the card tappable for immediate access to the community.
+- Compact controls and text adapt to shorter phones; long story and discussion pages remain scrollable.
+- Kept swipe gestures, undo, saved answers, and all profile features intact.
+
 ## 2026-11-20 — Threaded replies (v1.3)
 
 - Replies can be posted to any story, discussion comment, or existing reply, with nested indentation.
