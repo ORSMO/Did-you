@@ -58,3 +58,16 @@ Add real accounts, a persistent backend/database, privacy controls, abuse report
 - **Stories:** Read the community for the current card, or open the most recently answered question in the feedback strip.
 
 Answers are saved privately in your browser and the feed advances automatically after each answer.
+
+## Social profile · v1.2
+
+Profiles now include an editable display name and username, a 160-character bio, an optional Instagram handle and website, four cover themes, and an uploadable profile photo. Photos are downscaled in the browser and stored locally.
+
+The Instagram-style profile includes a curated **Dids** experience gallery, up to three pinned highlights, separate tabs for named stories and questions asked, and a **Preview profile** button.
+
+- Swipe **Yes** on a question.
+- From **My Life**, press **+ Show** next to a Yes answer (or visit its community and choose **Display this Did on your profile**).
+- Open **Me → Manage Dids** to show or hide selected experiences and pin highlights.
+- Your other Yes/No answers remain private. Anonymous stories are excluded from the profile preview.
+
+**Prototype privacy note:** This remains a static, browser-only demo. The profile is not publicly accessible to other visitors, Instagram is an external profile link rather than a connected account, and uploaded photos are not sent to a server. Real shared profiles require authentication, storage, permissions, and moderation infrastructure.
