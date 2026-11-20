@@ -12,7 +12,6 @@
     "android": {
       "package": "com.orsmo.didyou",
       "versionCode": 1,
-      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#12121E"
       }
