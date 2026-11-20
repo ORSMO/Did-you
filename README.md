@@ -4,7 +4,11 @@ A mobile-friendly, single-page demo combining swipe-to-answer discovery with top
 
 ## Live demo
 
-This repository is ready to publish as a **Render Static Site**. Add the live URL here after the first deployment.
+**Live website:** https://did-you.onrender.com
+
+**Deployment dashboard:** https://dashboard.render.com/static/srv-dc00aiajnfac738keo8g
+
+The site is deployed as a **Render Static Site** with automatic deployments from the `main` branch.
 
 ## What you can do
 
