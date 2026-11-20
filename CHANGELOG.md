@@ -1,3 +1,10 @@
+## 2026-11-20 — Threaded replies (v1.3)
+
+- Replies can be posted to any story, discussion comment, or existing reply, with nested indentation.
+- Added collapsible threads, individual reply upvotes, and optional anonymous replies.
+- Included sample multi-level threads in Stories and Discussions.
+- Preserved legacy flat replies and stored new threads locally in the browser.
+
 ## 2026-11-20 — Social profile glow-up (v1.2)
 
 - Added custom profile photos, display name, bio, Instagram link and website.
