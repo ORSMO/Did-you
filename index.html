@@ -218,8 +218,124 @@ function createQuestion(){const titleInput=document.getElementById('newTitle'),d
 function renderCollection(){const ids=Object.keys(state.answers);const yes=ids.filter(id=>state.answers[id]==='yes').length;const no=ids.length-yes;return `<div class="eyebrow mt8">Your life collection</div><h1 class="section-heading">The things you've lived.</h1><p class="section-sub">A private journal of your yeses, your not-yets, and the questions you want to remember.</p><div class="stat-grid"><div class="stat-box"><b>${yes}</b><span>I've done</span></div><div class="stat-box"><b>${no}</b><span>Not yet</span></div><div class="stat-box"><b>${state.stories?Object.values(state.stories).reduce((n,x)=>n+x.length,0):0}</b><span>My stories</span></div></div><div class="tabline"><button class="${collectionTab==='answered'?'active':''}" onclick="switchCollection('answered')">Answered (${ids.length})</button><button class="${collectionTab==='saved'?'active':''}" onclick="switchCollection('saved')">Saved (${state.saved.length})</button><button class="${collectionTab==='wishlist'?'active':''}" onclick="switchCollection('wishlist')">Want to try (${state.wishlist.length})</button></div><div class="mt18">${renderCollectionItems()}</div><div class="moderation-note">🔐 Your answers are private by default in this prototype. Shared stories are separate actions. Privacy settings should remain central in a real launch.</div>`}
 function switchCollection(tab){collectionTab=tab;render(false)}
 function renderCollectionItems(){let ids=collectionTab==='answered'?Object.keys(state.answers):collectionTab==='saved'?state.saved:state.wishlist;ids=ids.filter(id=>!!question(id));if(!ids.length)return `<div class="zero"><div class="big">${collectionTab==='answered'?'🌱':collectionTab==='saved'?'📚':'🌟'}</div><h3>${collectionTab==='answered'?'Your story starts with a swipe':collectionTab==='saved'?'Nothing saved just yet':'A world of things to try'}</h3><p>${collectionTab==='answered'?'Swipe yes or no to begin building your collection.':collectionTab==='saved'?'Bookmark interesting questions to find them here.':'Add experiences you haven’t tried to your bucket list.'}</p><button class="btn primary" onclick="go('swipe')">Explore questions</button></div>`;return ids.slice().reverse().map(id=>{const q=question(id);return `<button class="collection-item" onclick="openQ('${id}','collection')"><span class="emo">${esc(q.emoji)}</span><div style="flex:1;min-width:0"><h4>${esc(q.title)}</h4><p>${esc(q.category)}</p></div>${collectionTab==='answered'?`<span class="answer-badge ${state.answers[id]}">${state.answers[id]==='yes'?'✓ Yes':'✕ No'}</span>`:icons('arrow')}</button>`}).join('')}
-function renderProfile(){const answered=Object.keys(state.answers).length;return `<div class="eyebrow mt8">Your space</div><h1 class="section-heading">This is your story.</h1><p class="section-sub">Make it yours, set your comfort level, and keep your experiences on your terms.</p><div class="profile-banner"><div class="profile-big-emoji">😎</div><div><h2>@${esc(state.alias)}</h2><p>Curious human · ${answered} questions answered</p><span class="pill lime mt8">✦ Early explorer</span></div></div><div class="feature-line"><h3>Your name</h3></div><div class="row"><input class="field" id="aliasInput" maxlength="18" placeholder="Your username" value="${esc(state.alias)}" aria-label="Username"><button class="btn primary smol" onclick="changeAlias()">Save</button></div><div class="feature-line"><h3>Comfort & privacy</h3></div><div class="setting-row"><div><strong>Include darker questions</strong><p>Show reflective topics about regrets, secrets, and difficult experiences.</p></div><button class="toggle ${state.allowDark?'on':''}" aria-label="Toggle darker questions" aria-pressed="${state.allowDark}" onclick="toggleDark()"></button></div><div class="setting-row"><div><strong>Private answers</strong><p>Your yes/no history is visible only in My Life. Stories are shared only if you choose to post.</p></div><span class="pill lime">On</span></div><div class="feature-line"><h3>About this prototype</h3></div><div class="rail-card"><span class="eyebrow">You're exploring a demo</span><h3 style="font-size:19px">Built to feel real.</h3><p>All initial questions, responses, usernames, and metrics are fictional. Your answers, new questions, likes, and stories persist only in this browser via local storage.</p></div><div class="mt18"><button class="btn dark full" onclick="resetDemo()">Reset all demo activity</button></div><p class="footer-note">DID YOU? · concept prototype · no server or user accounts</p>`}
-function changeAlias(){const val=document.getElementById('aliasInput').value.trim().replace(/[^\w]/g,'').slice(0,18);if(val.length<3){toast('Use at least 3 letters or numbers');return}state.alias=val;save();render(false);toast('Username updated')}
+function safeAvatarSrc(){
+ const src=typeof state.profile?.avatar==='string'?state.profile.avatar:'';
+ return /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src)&&src.length<500000?src:'';
+}
+function profileAvatarMarkup(size='large'){
+ const src=safeAvatarSrc();
+ return src?`<img class="avatar-image ${size==='small'?'avatar-small':''}" src="${src}" alt="Profile picture">`:`<span class="avatar-fallback">✦</span>`;
+}
+function publicProfileDids(){
+ return state.publicDids.filter(id=>state.answers[id]==='yes'&&!!question(id)).map(id=>question(id)).sort((a,b)=>(state.pinnedDids.includes(b.id)?1:0)-(state.pinnedDids.includes(a.id)?1:0));
+}
+function publicProfileStories(){
+ return Object.entries(state.stories||{}).flatMap(([id,stories])=>(Array.isArray(stories)?stories:[]).filter(s=>s.mine&&s.user!=='@anonymous').map(s=>({q:question(id),story:s}))).filter(item=>!!item.q).reverse();
+}
+function displayDidCard(q){
+ const pinned=state.pinnedDids.includes(q.id);
+ return `<article class="did-tile"><button class="did-art" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}" onclick="openQ('${q.id}','profile')" aria-label="See stories for ${esc(q.title)}"><span class="did-art-shine"></span><span class="did-art-emoji">${esc(q.emoji)}</span><span class="did-art-status">✓ I did</span><strong>${esc(q.title)}</strong></button><div class="did-tile-meta"><span>#${esc(q.category)}</span>${profilePreview?`<span>${pinned?'📌 Featured':'✦ Did'}</span>`:`<button onclick="toggleDidPin('${q.id}')" title="${pinned?'Unpin this Did':'Pin to highlights'}">${pinned?'📌 Pinned':'☆ Pin'}</button>`}</div></article>`;
+}
+function renderProfile(){
+ const p=state.profile,shown=publicProfileDids(),posts=publicProfileStories(),created=state.questions.filter(q=>q.created),pins=shown.filter(q=>state.pinnedDids.includes(q.id)).slice(0,3);
+ const instagram=(p.instagram||'').replace(/^@/,'').replace(/[^a-zA-Z0-9._]/g,'').slice(0,30);
+ const site=typeof p.website==='string'&&/^https?:\/\/[^\s]+$/i.test(p.website)?p.website:'';
+ const theme=['violet','sunset','ocean','lime'].includes(p.theme)?p.theme:'violet';
+ return `<div class="profile-topline"><span class="eyebrow">Your story, your way ✦</span><button class="profile-preview-toggle" onclick="toggleProfilePreview()">${profilePreview?'← Back to editing':'◉ Preview profile'}</button></div>
+ <section class="profile-shell">
+ <div class="profile-cover-v2 theme-${theme}"><div class="profile-cover-orb"></div><span class="profile-cover-brand">DID YOU? / THE EXPERIENCE CLUB</span><strong>Life looks good<br>on you. ✨</strong><span class="profile-cover-mark">✳</span></div>
+ <div class="profile-info-v2">
+  <div class="profile-photo-row"><button class="profile-photo-button" onclick="${profilePreview?'toggleProfilePreview()':"document.getElementById('profileAvatarUpload').click()"}" aria-label="${profilePreview?'Back to profile editing':'Change profile picture'}"><span class="profile-photo-ring">${profileAvatarMarkup()}</span>${profilePreview?'':'<span class="profile-photo-plus">＋</span>'}</button>
+  <input hidden id="profileAvatarUpload" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadProfileAvatar(this)" aria-label="Upload a profile photo">
+  <div class="profile-identity"><div class="profile-user-line"><h1>${esc(p.name||state.alias)}</h1><span class="profile-sparkle">✦</span></div><p>@${esc(state.alias)}</p></div></div>
+  <div class="profile-bio">${esc(p.bio||'Add a little something about yourself ✨').replace(/\n/g,'<br>')}</div>
+  ${instagram||site?`<div class="profile-links">${instagram?`<a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/${encodeURIComponent(instagram)}/">◎ Instagram · @${esc(instagram)} ↗</a>`:''}${site?`<a target="_blank" rel="noopener noreferrer" href="${esc(site)}">↗ ${esc(site.replace(/^https?:\/\//,'').replace(/\/$/,'').slice(0,34))}</a>`:''}</div>`:''}
+  <div class="profile-metrics"><div><b>${shown.length}</b><span>Dids shown</span></div><div><b>${posts.length}</b><span>Stories</span></div><div><b>${created.length}</b><span>Questions</span></div></div>
+  ${profilePreview?`<div class="preview-banner">👀 This is a preview. Only your selected Dids and named stories appear here.</div>`:`<div class="profile-action-bar"><button class="btn primary" onclick="toggleProfileEditor()">✎ ${profileEditorOpen?'Close editor':'Edit profile'}</button><button class="btn dark" onclick="toggleDidPicker()">✦ ${profilePickerOpen?'Close gallery':'Manage Dids'}</button></div>`}
+ </div></section>
+ ${profileEditorOpen&&!profilePreview?renderProfileEditor():''}
+ ${profilePickerOpen&&!profilePreview?renderDidPicker():''}
+ <div class="profile-highlights-header"><h3>★ Highlights</h3>${!profilePreview?`<button class="text-btn" onclick="toggleDidPicker()">+ Pick highlights</button>`:''}</div>
+ <div class="profile-highlight-strip">${pins.length?pins.map(q=>`<button class="highlight-bubble" onclick="openQ('${q.id}','profile')"><span class="highlight-icon" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}">${esc(q.emoji)}</span><small>${esc(q.category)}</small></button>`).join(''):`<div class="profile-highlight-empty"><span>✦</span><p>Pin your favorite Dids here so people know your vibe.</p>${!profilePreview?`<button class="inline-link" onclick="toggleDidPicker()">Choose a Did →</button>`:''}</div>`}</div>
+ <div class="profile-gallery-title"><div><span class="eyebrow">YOUR EXPERIENCES</span><h2>The life behind the profile.</h2></div></div>
+ <div class="profile-tabs"><button class="${profileTab==='dids'?'active':''}" onclick="switchProfileTab('dids')">✦ Dids <span>${shown.length}</span></button><button class="${profileTab==='stories'?'active':''}" onclick="switchProfileTab('stories')">☷ Stories <span>${posts.length}</span></button><button class="${profileTab==='questions'?'active':''}" onclick="switchProfileTab('questions')">❔ Asked <span>${created.length}</span></button></div>
+ ${profileTab==='dids'?renderProfileDidGrid(shown):profileTab==='stories'?renderProfileStories(posts):renderProfileQuestions(created)}
+ ${!profilePreview?`<div class="profile-privacy-panel"><div class="privacy-heading">🔒 You're in control</div><p>Answering Yes or No never adds anything to this profile. Only Dids you deliberately display, and stories you post with your name, appear in this preview.</p><div class="setting-row"><div><strong>Include darker questions</strong><p>Show reflective topics about difficult experiences.</p></div><button class="toggle ${state.allowDark?'on':''}" aria-label="Toggle darker questions" aria-pressed="${state.allowDark}" onclick="toggleDark()"></button></div><button class="profile-reset-link" onclick="resetDemo()">Reset all demo activity</button></div>`:''}
+ <p class="footer-note">DID YOU? · Local demo profile · no public accounts or cloud uploads yet</p>`;
+}
+function renderProfileDidGrid(shown){
+ if(!shown.length)return `<div class="profile-gallery-empty"><span class="gallery-empty-art">✳</span><h3>A little empty in here...</h3><p>Your life is full of stories. Pick a few Yes answers to put on display — the rest stay private.</p><button class="btn primary" onclick="${profilePreview?'toggleProfilePreview()':'toggleDidPicker()'}">${profilePreview?'Back to my profile':'+ Add my first Did'}</button></div>`;
+ return `<div class="did-gallery">${shown.map(displayDidCard).join('')}</div><p class="gallery-footnote">Only experiences you chose to show appear in this gallery.</p>`;
+}
+function renderProfileStories(posts){
+ if(!posts.length)return `<div class="profile-gallery-empty"><span class="gallery-empty-art">✍️</span><h3>Stories worth telling</h3><p>Post a story in any community with your username to see it here. Anonymous stories stay off your profile.</p><button class="btn dark" onclick="go('explore')">Find a question →</button></div>`;
+ return `<div class="profile-story-stack">${posts.map(({q,story})=>`<button class="profile-story-item" onclick="openQ('${q.id}','profile')"><span class="profile-story-art" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}">${esc(q.emoji)}</span><div class="profile-story-copy"><small>${esc(q.category)} · YOUR STORY</small><strong>${esc(q.title)}</strong><p>“${esc(story.body.slice(0,140))}${story.body.length>140?'…':''}”</p></div><span class="profile-story-arrow">↗</span></button>`).join('')}</div>`;
+}
+function renderProfileQuestions(created){
+ if(!created.length)return `<div class="profile-gallery-empty"><span class="gallery-empty-art">❔</span><h3>Start a conversation</h3><p>Your questions will live here. Ask something that could spark a thousand stories.</p><button class="btn dark" onclick="go('create')">Create a question +</button></div>`;
+ return `<div class="profile-story-stack">${created.map(q=>`<button class="profile-story-item" onclick="openQ('${q.id}','profile')"><span class="profile-story-art" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}">${esc(q.emoji)}</span><div class="profile-story-copy"><small>${esc(q.category)} · ASKED BY YOU</small><strong>${esc(q.title)}</strong><p>Tap to see its community ↗</p></div></button>`).join('')}</div>`;
+}
+function renderProfileEditor(){
+ const p=state.profile,theme=['violet','sunset','ocean','lime'].includes(p.theme)?p.theme:'violet';
+ return `<section id="profileEditPanel" class="profile-editor-panel"><div class="row between"><h3>✎ Make it yours</h3><button class="profile-close" aria-label="Close profile editor" onclick="toggleProfileEditor()">×</button></div><p class="safe-note">Add a photo by tapping your avatar above. Your edits are saved in this browser.</p>
+ <div class="profile-form-row"><label for="profileDisplayName">Display name</label><input class="field" id="profileDisplayName" maxlength="36" value="${esc(p.name||'')}" placeholder="What should people call you?"></div>
+ <div class="profile-form-row"><label for="profileAlias">Username</label><input class="field" id="profileAlias" maxlength="18" value="${esc(state.alias)}" placeholder="yourname"></div>
+ <div class="profile-form-row"><label for="profileBio">Bio <small>(160 characters)</small></label><textarea id="profileBio" class="field" rows="4" maxlength="160" placeholder="Your vibe, hobbies, a funny line...">${esc(p.bio||'')}</textarea></div>
+ <div class="profile-form-row"><label for="profileInstagram">Instagram username <span class="optional">optional</span></label><div class="profile-input-prefix"><span>◎ @</span><input id="profileInstagram" class="field" maxlength="30" value="${esc(p.instagram||'')}" placeholder="instagramhandle"></div></div>
+ <div class="profile-form-row"><label for="profileWebsite">Website <span class="optional">optional</span></label><input id="profileWebsite" class="field" type="url" maxlength="200" value="${esc(p.website||'')}" placeholder="https://your-site.com"></div>
+ <div class="profile-form-row"><label for="profileTheme">Profile vibe</label><div class="theme-choices">${[['violet','Cosmic'],['sunset','Sunset'],['ocean','Ocean'],['lime','Electric']].map(([key,label])=>`<label class="theme-option theme-${key}"><input type="radio" name="profileTheme" value="${key}" ${theme===key?'checked':''}><span class="theme-swatch"></span><small>${label}</small></label>`).join('')}</div></div>
+ <div class="row mt18"><button class="btn primary full" onclick="saveProfileEditor()">Save profile ✦</button><button class="btn dark smol" onclick="removeProfileAvatar()">Remove photo</button></div></section>`;
+}
+function renderDidPicker(){
+ const yeses=Object.keys(state.answers).filter(id=>state.answers[id]==='yes'&&question(id)).reverse();
+ return `<section id="profileDidPicker" class="profile-picker-panel"><div class="row between"><div><span class="eyebrow">YOUR YES MOMENTS</span><h3>Pick your display Dids</h3></div><button class="profile-close" onclick="toggleDidPicker()" aria-label="Close Did picker">×</button></div><p class="safe-note">Your answers are private until you choose Show. Pin up to three displayed Dids as highlights.</p>
+ ${yeses.length?`<div class="did-picker-list">${yeses.map(id=>{const q=question(id),shown=state.publicDids.includes(id),pinned=state.pinnedDids.includes(id);return `<div class="did-picker-item"><span class="picker-emoji" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}">${esc(q.emoji)}</span><div class="picker-copy"><strong>${esc(q.title)}</strong><small>#${esc(q.category)}</small></div><button class="picker-toggle ${shown?'on':''}" onclick="toggleDidDisplay('${id}')" aria-pressed="${shown}">${shown?'✓ Showing':'+ Show'}</button>${shown?`<button class="picker-pin ${pinned?'on':''}" title="${pinned?'Unpin':'Pin'}" onclick="toggleDidPin('${id}')">${pinned?'📌':'☆'}</button>`:''}</div>`}).join('')}</div>`:`<div class="profile-empty-yes"><span>✨</span><strong>Nothing to display yet</strong><p>Swipe Yes on an experience you’ve had, then come back to put it on your profile.</p><button class="btn primary full" onclick="go('swipe')">Start swiping →</button></div>`}
+ </section>`;
+}
+function switchProfileTab(tab){if(['dids','stories','questions'].includes(tab)){profileTab=tab;render(false)}}
+function toggleProfileEditor(){profileEditorOpen=!profileEditorOpen;profilePickerOpen=false;profilePreview=false;render(false);if(profileEditorOpen)document.getElementById('profileEditPanel')?.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function toggleDidPicker(){profilePickerOpen=!profilePickerOpen;profileEditorOpen=false;profilePreview=false;render(false);if(profilePickerOpen)document.getElementById('profileDidPicker')?.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function toggleProfilePreview(){profilePreview=!profilePreview;profileEditorOpen=false;profilePickerOpen=false;render(true)}
+function toggleDidDisplay(id){
+ if(state.answers[id]!=='yes'||!question(id)){toast('Swipe Yes on this question first');return}
+ if(state.publicDids.includes(id)){state.publicDids=state.publicDids.filter(x=>x!==id);state.pinnedDids=state.pinnedDids.filter(x=>x!==id);toast('Did removed from profile')}
+ else{state.publicDids.push(id);toast('Did added to your profile ✦')}
+ save();render(false);
+}
+function toggleDidPin(id){
+ if(!state.publicDids.includes(id)){toast('Show this Did on your profile first');return}
+ if(state.pinnedDids.includes(id)){state.pinnedDids=state.pinnedDids.filter(x=>x!==id);toast('Highlight unpinned')}
+ else{if(state.pinnedDids.length>=3){toast('You can pin up to three Dids');return}state.pinnedDids.push(id);toast('Pinned to highlights ✦')}
+ save();render(false);
+}
+function saveProfileEditor(){
+ const display=document.getElementById('profileDisplayName')?.value.trim().slice(0,36);
+ const alias=(document.getElementById('profileAlias')?.value||'').trim().replace(/[^a-zA-Z0-9_]/g,'').slice(0,18);
+ const bio=(document.getElementById('profileBio')?.value||'').trim().slice(0,160);
+ const instagram=(document.getElementById('profileInstagram')?.value||'').trim().replace(/^@/,'').replace(/[^a-zA-Z0-9._]/g,'').slice(0,30);
+ let site=(document.getElementById('profileWebsite')?.value||'').trim().slice(0,200);
+ const theme=document.querySelector('input[name="profileTheme"]:checked')?.value||'violet';
+ if(alias.length<3){toast('Username needs at least 3 letters or numbers');return}
+ if(!display){toast('Add a display name first');return}
+ if(site){if(!/^https?:\/\//i.test(site))site='https://'+site;try{const url=new URL(site);if(!['https:','http:'].includes(url.protocol)||!url.hostname.includes('.'))throw Error('Invalid website');site=url.href}catch(e){toast('Please enter a valid website');return}}
+ const oldAlias=state.alias;
+ state.alias=alias;state.profile={...state.profile,name:display,bio,instagram,website:site,theme:['violet','sunset','ocean','lime'].includes(theme)?theme:'violet'};
+ if(oldAlias!==alias){
+  for(const group of [state.stories,state.discussions])for(const items of Object.values(group||{}))for(const item of items){if(item.mine&&item.user!=='@anonymous')item.user='@'+alias}
+  for(const replies of Object.values(state.storyReplies||{}))for(const reply of replies){if(reply.user==='@'+oldAlias)reply.user='@'+alias}
+ }
+ save();profileEditorOpen=false;render(false);toast('Profile glow-up saved ✨');
+}
+function uploadProfileAvatar(input){
+ const file=input.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG, or WebP photo');return}
+ if(file.size>8000000){toast('Please choose a photo smaller than 8 MB');return}
+ const url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{try{const max=360,ratio=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*ratio));canvas.height=Math.max(1,Math.round(img.height*ratio));const ctx=canvas.getContext('2d');ctx.fillStyle='#30293c';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);const data=canvas.toDataURL('image/jpeg',.78);if(data.length>500000)throw Error('Too big');const old=state.profile.avatar;state.profile.avatar=data;try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){state.profile.avatar=old;toast('Browser storage is full. Try a smaller photo.');return}render(false);toast('Profile photo updated 📸')}catch(e){toast('Could not process that photo')}finally{URL.revokeObjectURL(url)}};
+ img.onerror=()=>{URL.revokeObjectURL(url);toast('Could not read that image')};
+ img.src=url;
+}
+function removeProfileAvatar(){state.profile.avatar='';save();profileEditorOpen=false;render(false);toast('Profile picture removed')}
 function toggleDark(){state.allowDark=!state.allowDark;save();if(!state.allowDark&&feedFilter==='Dark')feedFilter='All';if(!state.allowDark&&exploreFilter==='Dark')exploreFilter='All';render(false);toast(state.allowDark?'Darker topics enabled':'Darker topics hidden')}
 function resetDemo(){if(!window.confirm('Reset your answers, stories, saved questions, and all other demo activity?'))return;state=fresh();profileTab='dids';profileEditorOpen=false;profilePickerOpen=false;profilePreview=false;skipped.clear();swipeBusy=false;lastAnsweredId=null;feedFilter='All';exploreFilter='All';exploreTerm='';save();go('swipe');toast('Demo activity reset')}
 // Extra seeded stories are immutable: store replies separately and merge them into displayed cards.
