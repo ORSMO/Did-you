@@ -170,6 +170,30 @@
 .collection-spotlight{flex:none;background:#343145;color:#d4cde2;border:1px solid #504b60;font-size:9px;font-weight:800;border-radius:9px;padding:10px 7px;white-space:nowrap}
 .collection-spotlight.on{background:#c9fd7c1d;color:var(--lime);border-color:#c9fd7c5e}
 .story-avatar .avatar-image{border-radius:11px}.story-avatar .avatar-fallback{border-radius:11px;font-size:17px}
+
+/* Reddit-style replies to replies */
+.nested-replies{margin-top:10px}
+.nested-reply{margin-left:calc(min(var(--thread-depth),5)*11px);padding:9px 0 8px 11px;border-left:2px solid #655975;border-bottom:1px solid #ffffff0a}
+.nested-reply:nth-child(even){border-left-color:#81a48c}
+.nested-reply-heading{display:flex;align-items:center;gap:6px}
+.nested-reply-heading b{font-size:11px;color:#f0eafa;max-width:140px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.nested-reply-heading small{font-size:9px;color:#a49aae;white-space:nowrap}
+.nested-reply-avatar{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;overflow:hidden;background:#453950;font-size:12px;flex:none}
+.nested-reply-avatar .avatar-image,.nested-reply-avatar .avatar-fallback{border-radius:50%}
+.nested-reply-avatar .avatar-fallback{font-size:12px}
+.nested-reply>p{font-size:11.5px;line-height:1.55;color:#e6e0f1;white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 8px}
+.nested-reply-actions{display:flex;align-items:center;flex-wrap:wrap;gap:13px}
+.nested-reply-actions button{border:0;background:transparent;padding:3px 0;font-size:10px;font-weight:800;color:#bab0c9}
+.nested-reply-actions button.liked{color:var(--lime)}
+.nested-editor{background:#29243c;border:1px solid #524662;border-radius:12px;padding:10px;margin:9px 0}
+.nested-editor-target{font-size:10px;color:#b5acbf;margin-bottom:7px}
+.nested-editor-target b{color:#f4f0fc}
+.nested-editor textarea{font-size:11px;resize:vertical;min-height:62px}
+.nested-editor-actions{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:7px}
+.nested-editor-actions label{font-size:10px;color:#c4b9cf;display:flex;gap:5px;align-items:center}
+.thread-unfold{border:1px dashed #605271;color:#cbbfde;background:#29243a;border-radius:9px;padding:8px 12px;font-size:10px;margin-top:8px}
+.story-actions{flex-wrap:wrap}
+@media(max-width:390px){.nested-reply{margin-left:calc(min(var(--thread-depth),5)*8px);padding-left:8px}.nested-reply-heading b{max-width:95px}}
 </style>
 </head>
 <body>
@@ -313,14 +337,61 @@ function questionItem(q,i=0){return `<button class="question-item" onclick="open
 function renderCommunity(){const q=question(activeId);if(!q){screen='explore';return renderExplore()}const p=qPercent(q),answer=state.answers[q.id],saved=state.saved.includes(q.id);return `<button class="back" onclick="backQ()">${icons('back')} Back to ${previousScreen==='swipe'?'swiping':previousScreen==='explore'?'explore':previousScreen==='collection'?'my life':'the app'}</button><section class="community-cover" style="background:${CATS[q.category]?.bg||CATS.Personal.bg}"><span class="tag">${esc(q.category)} ${esc(q.emoji)}</span><span class="emoji" aria-hidden="true">${esc(q.emoji)}</span><div><h1>${esc(q.title)}</h1><p>${esc(q.description)}</p></div></section><div class="community-tools"><button class="btn dark smol" onclick="toggleSave('${q.id}')">${icons('bookmark')} ${saved?'Saved ✓':'Save'}</button><button class="btn dark smol" onclick="copyQ('${q.id}')">${icons('share')} Copy</button><button class="btn dark smol" onclick="switchCommunityTab('discussion')">${icons('chat')} Talk</button></div><section class="vote-panel"><div class="row between"><strong>Community pulse</strong><span class="tiny muted">${countLabel(qCounts(q).yes+qCounts(q).no)} answers · demo</span></div><div class="progress-track mt12"><div class="progress-yes" style="width:${p}%"></div><div class="progress-no" style="width:${100-p}%"></div></div><div class="stats-labels"><span style="color:var(--lime)">${p}% Yes, I did</span><span style="color:var(--pink)">${100-p}% No, I didn't</span></div>${answer?`<div class="row between mt12"><span class="tiny muted">Your private answer</span><span class="answer-badge ${answer}">${typeLabel(answer)}</span></div>${answer==='no'?`<button class="btn ghost smol mt8" onclick="toggleWish('${q.id}')">${state.wishlist.includes(q.id)?'✓ On your bucket list':'☆ Want to try this?'}</button>`:answer==='yes'?`<button class="btn dark smol mt8" onclick="toggleDidDisplay('${q.id}')">${state.publicDids.includes(q.id)?'✓ On your profile · Hide':'✦ Display this Did on your profile'}</button>`:''}`:`<div class="mini-votes"><button class="btn dark smol" onclick="answerInCommunity('${q.id}','no')">${icons('x')} No, I didn't</button><button class="btn primary smol" onclick="answerInCommunity('${q.id}','yes')">${icons('check')} Yes, I did</button></div>`}</section><div class="tabline"><button class="${communityTab==='stories'?'active':''}" onclick="switchCommunityTab('stories')">💬 Stories (${allStories(q).length})</button><button class="${communityTab==='discussion'?'active':''}" onclick="switchCommunityTab('discussion')">🗣️ Discussion (${(state.discussions[q.id]||[]).length+2})</button></div>${communityTab==='stories'?renderCommunityStories(q):renderDiscussion(q)}<div class="moderation-note">🛡️ This is a demo with fictional posts and counts. In a real app, stories would support reporting, moderation, privacy controls, and age-appropriate content filters.</div>`}
 function switchCommunityTab(tab){communityTab=tab;composeOpen=false;replyOpen=null;render(false)}
 function answerInCommunity(id,value){state.answers[id]=value;save();render(false);toast('Answer saved privately');}
-function storyCard(s,q){const liked=state.likes.includes(s.id),replies=s.replies||[];return `<article class="story-card"><div class="story-top"><span class="story-avatar">${s.user==='@anonymous'?'🌙':s.user===('@'+state.alias)?profileAvatarMarkup('small'):'🙂'}</span><div style="flex:1"><div class="story-user">${esc(s.user)}</div><div class="story-when">${esc(s.created||'Recently')} ${s.user==='@anonymous'?'· shared anonymously':''}</div></div>${s.mine?'<span class="pill lime">Yours</span>':''}</div><p class="story-body">${esc(s.body)}</p><div class="story-actions"><button class="${liked?'liked':''}" onclick="toggleLike('${s.id}')">${icons('heart')} ${countLabel((s.likes||0)+(liked?1:0))}</button><button onclick="toggleReply('${s.id}')">${icons('chat')} Reply ${replies.length?`(${replies.length})`:''}</button></div>${replies.map(r=>`<div class="reply-line"><strong>${esc(r.user)}:</strong> ${esc(r.body)}</div>`).join('')}${replyOpen===s.id?`<div class="reply-form"><input class="field" id="replyInput-${s.id}" maxlength="400" placeholder="Write a kind reply…"><button class="btn primary smol" onclick="postReply('${q.id}','${s.id}')">Post</button></div>`:''}</article>`}
+const threadCollapsed=new Set();
+const demoReplyTrees={
+ 'q02s0':[{id:'demo-thai-a',user:'@islandideas',body:'Which part of Thailand should I visit first?',likes:25,created:'Yesterday'}],
+ 'demo-thai-a':[{id:'demo-thai-b',user:'@nomadnina',body:'Chiang Mai for the food, Krabi for the beaches!',likes:14,created:'Yesterday'}],
+ 'q01s0':[{id:'demo-funny-a',user:'@laughinglily',body:'Did anyone else laugh too? 😭',likes:19,created:'Yesterday'}],
+ 'demo-funny-a':[{id:'demo-funny-b',user:'@livelylou',body:'Every single person in the room.',likes:12,created:'Yesterday'}]
+};
+function replyChildren(p){
+ const copy=(arr,tag)=>Array.isArray(arr)?arr.map((r,i)=>({...r,id:r.id||'legacy-'+p.id+'-'+tag+'-'+i})):[];
+ return [...copy(p.replies,'a'),...copy(state.storyReplies?.[p.id],'b'),...copy(demoReplyTrees[p.id],'c'),...copy(state.threadReplies?.[p.id],'d')];
+}
+function replyEditor(p){
+ if(replyOpen!==p.id)return '';
+ const id=esc(p.id);
+ return `<div class="nested-editor"><div class="nested-editor-target">↳ Replying to <b>${esc(p.user||'this comment')}</b></div><textarea class="field" id="replyInput-${id}" rows="2" maxlength="500" placeholder="Add to this conversation…"></textarea><div class="nested-editor-actions"><label><input type="checkbox" id="replyAnon-${id}"> Anonymous</label><button class="btn primary smol" onclick="postReply('${esc(activeId)}','${id}')">Post reply ↗</button></div></div>`;
+}
+function nestedReplies(p,level=1){
+ if(level>25)return '';
+ const children=replyChildren(p);
+ if(!children.length)return '';
+ if(threadCollapsed.has(p.id))return `<button class="thread-unfold" onclick="toggleThread('${esc(p.id)}')">+ Show ${children.length} ${children.length===1?'reply':'replies'}</button>`;
+ return children.map(r=>{
+ const liked=state.likes.includes(r.id);
+ const avatar=r.user==='@anonymous'?'🌙':r.user==='@'+state.alias?profileAvatarMarkup('small'):'🙂';
+ return `<div class="nested-reply" data-reply-id="${esc(r.id)}" style="--thread-depth:${Math.min(level,6)}"><div class="nested-reply-heading"><span class="nested-reply-avatar">${avatar}</span><b>${esc(r.user||'@someone')}</b><small>· ${esc(r.created||'Just now')}</small></div><p>${esc(r.body||'')}</p><div class="nested-reply-actions"><button class="${liked?'liked':''}" onclick="toggleLike('${esc(r.id)}')">▲ ${countLabel((r.likes||0)+(liked?1:0))}</button><button onclick="toggleReply('${esc(r.id)}')">↳ Reply</button>${replyChildren(r).length?`<button onclick="toggleThread('${esc(r.id)}')">${threadCollapsed.has(r.id)?'+ Expand':'− Collapse'}</button>`:''}</div>${replyEditor(r)}</div>`+nestedReplies(r,level+1);
+ }).join('');
+}
+function toggleThread(id){if(threadCollapsed.has(id))threadCollapsed.delete(id);else threadCollapsed.add(id);render(false)}
+function storyCard(s,q){
+ const liked=state.likes.includes(s.id),replies=replyChildren(s);
+ const avatar=s.user==='@anonymous'?'🌙':s.user==='@'+state.alias?profileAvatarMarkup('small'):'🙂';
+ return `<article class="story-card"><div class="story-top"><span class="story-avatar">${avatar}</span><div style="flex:1"><div class="story-user">${esc(s.user)}</div><div class="story-when">${esc(s.created||'Recently')} ${s.user==='@anonymous'?'· shared anonymously':''}</div></div>${s.mine?'<span class="pill lime">Yours</span>':''}</div><p class="story-body">${esc(s.body)}</p><div class="story-actions"><button class="${liked?'liked':''}" onclick="toggleLike('${esc(s.id)}')">${icons('heart')} ${countLabel((s.likes||0)+(liked?1:0))}</button><button onclick="toggleReply('${esc(s.id)}')">${icons('chat')} Reply</button>${replies.length?`<button onclick="toggleThread('${esc(s.id)}')">${threadCollapsed.has(s.id)?'+ Expand':'− Collapse'} ${replies.length} ${replies.length===1?'reply':'replies'}</button>`:''}</div>${replyEditor(s)}<div class="nested-replies">${nestedReplies(s)}</div></article>`;
+}
 function renderCommunityStories(q){const stories=allStories(q);stories.sort((a,b)=>communitySort==='top'?(b.likes||0)-(a.likes||0):(a.mine?0:1)-(b.mine?0:1));return `<div class="feature-line"><h3>Real-ish stories</h3><button class="sort-control" onclick="toggleSort()">${communitySort==='top'?'Top stories ↓':'Recent first ↓'}</button></div><p class="safe-note" style="margin:-4px 0 12px">Posts below are fictional examples. Yours appear locally in this demo.</p><button class="btn primary full" onclick="toggleComposer()">${icons('plus')} ${composeOpen?'Close story editor':'Share your experience'}</button>${composeOpen?`<div class="composer"><strong class="small">Your story</strong><p class="tiny muted">You can share what happened, or why you haven't tried it.</p><textarea id="storyText" class="field" maxlength="1500" placeholder="It all started when…"></textarea><label class="row mt12 small" style="cursor:pointer"><input id="anonymousStory" type="checkbox"> Post anonymously</label><button class="btn primary full mt12" onclick="postStory('${q.id}')">Publish sample story ${icons('arrow')}</button></div>`:''}<div class="mt18">${stories.map(s=>storyCard(s,q)).join('')}</div>`}
 function toggleSort(){communitySort=communitySort==='top'?'recent':'top';render(false)}
 function toggleComposer(){composeOpen=!composeOpen;render(false)}
 function postStory(id){const node=document.getElementById('storyText');const body=node?.value.trim();if(!body||body.length<10){toast('Write at least 10 characters');return}const anon=document.getElementById('anonymousStory')?.checked;const s={id:'user-'+Date.now()+'-'+Math.floor(Math.random()*1000),user:anon?'@anonymous':'@'+state.alias,body:body.slice(0,1500),likes:0,mine:true,anonymous:!!anon,created:'Just now',replies:[]};(state.stories[id]??=[]).unshift(s);save();composeOpen=false;communitySort='recent';render(false);toast('Sample story published locally')}
 function toggleLike(id){const idx=state.likes.indexOf(id);if(idx<0)state.likes.push(id);else state.likes.splice(idx,1);save();render(false)}
 function toggleReply(id){replyOpen=replyOpen===id?null:id;render(false)}
-function postReply(qid,sid){const body=document.getElementById(`replyInput-${sid}`)?.value.trim();if(!body){toast('Write a reply first');return}const q=question(qid);const story=[...allStories(q),...(state.discussions[qid]||[])].find(s=>s.id===sid)||null;if(!story && !sid.startsWith(qid+'-d'))return;if(!story?.mine){let copy=(state.storyReplies??={})[sid]||[];copy.push({user:'@'+state.alias,body:body.slice(0,400)});state.storyReplies[sid]=copy;}else{(story.replies??=[]).push({user:'@'+state.alias,body:body.slice(0,400)})}save();replyOpen=null;render(false);toast('Reply added locally')}
+function postReply(qid,sid){
+ const body=document.getElementById('replyInput-'+sid)?.value.trim();
+ if(!body){toast('Write a reply first');return}
+ const q=question(qid);if(!q){toast('Question no longer exists');return}
+ const posts=[...allStories(q),...(state.discussions[qid]||[]),{id:qid+'-d1'},{id:qid+'-d2'}];
+ const seen=new Set();let found=false;
+ function scan(node,depth){if(!node?.id||depth>30||seen.has(node.id))return;seen.add(node.id);if(node.id===sid){found=true;return}for(const child of replyChildren(node))scan(child,depth+1)}
+ posts.forEach(p=>scan(p,0));
+ if(!found){toast('Comment no longer exists');return}
+ const anon=document.getElementById('replyAnon-'+sid)?.checked;
+ const reply={id:'reply-'+Date.now()+'-'+Math.floor(Math.random()*1000000),user:anon?'@anonymous':'@'+state.alias,body:body.slice(0,500),likes:0,created:'Just now',mine:true};
+ ((state.threadReplies??={})[sid]??=[]).push(reply);
+ save();replyOpen=null;threadCollapsed.delete(sid);render(false);
+ document.querySelector('[data-reply-id="'+reply.id+'"]')?.scrollIntoView?.({block:'nearest',behavior:'smooth'});
+ toast('Reply added to thread');
+}
 function renderDiscussion(q){const seeded=[{id:`${q.id}-d1`,user:'@curiouscat',body:`What's one thing you wish someone had told you about this experience?`,likes:23,created:'2 days ago'},{id:`${q.id}-d2`,user:'@openhorizon',body:'I love hearing completely different perspectives on the same question. Keep the stories coming!',likes:16,created:'Yesterday'}];const messages=[...(state.discussions[q.id]||[]),...seeded].sort((a,b)=>(b.mine?1:0)-(a.mine?1:0));return `<div class="feature-line"><h3>Open discussion</h3><span class="story-count">${messages.length} threads</span></div><p class="safe-note">Talk about the question, ask for advice, or share an opinion.</p><div class="composer"><textarea id="discussionText" class="field" maxlength="800" placeholder="Start a conversation…"></textarea><button class="btn primary full mt12" onclick="postDiscussion('${q.id}')">Start discussion ${icons('arrow')}</button></div><div class="mt18">${messages.map(s=>storyCard(s,q)).join('')}</div>`}
 function postDiscussion(qid){const text=document.getElementById('discussionText')?.value.trim();if(!text||text.length<4){toast('Write a little more first');return}const item={id:'discussion-'+Date.now(),user:'@'+state.alias,body:text.slice(0,800),likes:0,created:'Just now',mine:true,replies:[]};(state.discussions[qid]??=[]).unshift(item);save();render(false);toast('Discussion added locally')}
 function copyQ(id){const txt=question(id)?.title||'';if(navigator.clipboard?.writeText){navigator.clipboard.writeText(txt).then(()=>toast('Question copied')).catch(()=>fallbackCopy(txt));}else fallbackCopy(txt)}
@@ -464,9 +535,6 @@ function uploadProfileAvatar(input){
 function removeProfileAvatar(){state.profile.avatar='';save();profileEditorOpen=false;render(false);toast('Profile picture removed')}
 function toggleDark(){state.allowDark=!state.allowDark;save();if(!state.allowDark&&feedFilter==='Dark')feedFilter='All';if(!state.allowDark&&exploreFilter==='Dark')exploreFilter='All';render(false);toast(state.allowDark?'Darker topics enabled':'Darker topics hidden')}
 function resetDemo(){if(!window.confirm('Reset your answers, stories, saved questions, and all other demo activity?'))return;state=fresh();profileTab='dids';profileEditorOpen=false;profilePickerOpen=false;profilePreview=false;skipped.clear();swipeBusy=false;lastAnsweredId=null;feedFilter='All';exploreFilter='All';exploreTerm='';save();go('swipe');toast('Demo activity reset')}
-// Extra seeded stories are immutable: store replies separately and merge them into displayed cards.
-const originalStoryCard=storyCard;
-storyCard=function(s,q){return originalStoryCard({...s,replies:[...(s.replies||[]),...(state.storyReplies?.[s.id]||[])]},q)};
 window.addEventListener('keydown',e=>{if(screen!=='swipe'||swipeBusy||e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('input,textarea,select,[contenteditable]'))return;const q=feedQ();if(e.key==='ArrowRight'&&q){e.preventDefault();answerQuestion(q.id,'yes')}else if(e.key==='ArrowLeft'&&q){e.preventDefault();answerQuestion(q.id,'no')}else if(e.key==='ArrowDown'&&q){e.preventDefault();skipQuestion(q.id)}else if(e.key.toLowerCase()==='z'&&lastAnsweredId){e.preventDefault();undoLastAnswer()}});
 render(true);
 </script>
