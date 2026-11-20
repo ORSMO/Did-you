@@ -194,6 +194,69 @@
 .thread-unfold{border:1px dashed #605271;color:#cbbfde;background:#29243a;border-radius:9px;padding:8px 12px;font-size:10px;margin-top:8px}
 .story-actions{flex-wrap:wrap}
 @media(max-width:390px){.nested-reply{margin-left:calc(min(var(--thread-depth),5)*8px);padding-left:8px}.nested-reply-heading b{max-width:95px}}
+
+/* Swipe v1.4: one-screen, no-scroll phone layout */
+.view.swipe-compact{display:flex;flex-direction:column;overflow:hidden;min-height:0;padding-bottom:5px}
+.view.swipe-compact .swipe-intro{flex:0 0 auto;align-items:center;padding:4px 0 7px}
+.view.swipe-compact .swipe-intro h1{font-size:clamp(19px,2.8vh,25px);margin:2px 0}
+.view.swipe-compact .swipe-intro p{font-size:10px;line-height:1.1}
+.view.swipe-compact .swipe-intro .eyebrow{font-size:8px;letter-spacing:1px}
+.view.swipe-compact .chip-row{flex:0 0 auto;min-height:0;padding-top:2px;padding-bottom:7px;gap:6px}
+.view.swipe-compact .chip{padding:7px 10px;font-size:10px}
+.view.swipe-compact .swipe-stage{flex:1 1 0;min-height:0;padding-bottom:0;position:relative}
+.view.swipe-compact .swipe-stage .swipe-card{min-height:0!important;height:100%;padding:clamp(10px,2.1vh,18px);border-radius:21px}
+.view.swipe-compact .swipe-stage .swipe-peek{inset:8px 9px 0;bottom:0}
+.view.swipe-compact .card-emoji{font-size:clamp(43px,10.8vh,94px);margin:0;line-height:1;flex-shrink:1}
+.view.swipe-compact .card-title{font-size:clamp(19px,4.9vw,30px);line-height:1.04;letter-spacing:-.8px}
+.view.swipe-compact .card-description{font-size:clamp(10px,1.5vh,12px);line-height:1.3;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.view.swipe-compact .category-label{align-items:center;gap:5px}
+.view.swipe-compact .swipe-card .tag{padding:6px 8px;font-size:10px}
+.view.swipe-compact .swipe-card-stories{border:1px solid #ffffff7c;border-radius:20px;padding:7px 8px;color:#fff;background:#ffffff25;white-space:nowrap;font-size:10px;font-weight:850}
+.view.swipe-compact .swipe-buttons{flex:0 0 auto;gap:8px;margin:9px 0 5px}
+.view.swipe-compact .vote-btn{min-height:48px;padding:9px 5px;font-size:12px;border-radius:13px}
+.view.swipe-compact .vote-btn .ico{width:17px;height:17px}
+.view.swipe-compact .swipe-footer{flex:0 0 auto;gap:4px;min-height:38px}
+.view.swipe-compact .swipe-footer .btn{min-height:36px;padding:7px 8px;font-size:10px;gap:5px;white-space:nowrap;border-radius:11px}
+.view.swipe-compact .swipe-footer .ico{height:16px;width:16px}
+.view.swipe-compact .swipe-footer .swipe-stories-button{background:#312940;color:#f4dfff;border:1px solid #8060a4;flex:1;justify-content:center}
+.view.swipe-compact .swipe-feedback{flex:0 0 auto;min-height:34px;gap:7px;padding:4px 7px;margin:4px 0 0;border-radius:10px}
+.view.swipe-compact .feedback-check{width:21px;height:21px;font-size:12px}
+.view.swipe-compact .feedback-label strong{font-size:10px}
+.view.swipe-compact .feedback-label small{font-size:9px}
+.view.swipe-compact .feedback-story{padding:5px 8px;font-size:10px}
+.view.swipe-compact .feedback-undo{font-size:16px;padding:4px 7px}
+.view.swipe-compact .swipe-hint{flex:0 0 auto;font-size:9px;line-height:1.1;padding:4px 0 0;margin:0}
+@media(max-width:680px){
+ .view.swipe-compact{padding-bottom:4px}
+ .view.swipe-compact .swipe-intro{padding:2px 0 5px}
+ .view.swipe-compact .swipe-intro p{display:none}
+ .view.swipe-compact .chip-row{padding-bottom:5px}
+ .view.swipe-compact .swipe-hint{display:none}
+ .view.swipe-compact .card-emoji{font-size:clamp(40px,10vh,79px)}
+}
+@media(max-height:720px){
+ .view.swipe-compact .swipe-intro .eyebrow{display:none}
+ .view.swipe-compact .chip-row{padding-bottom:4px}
+ .view.swipe-compact .card-emoji{font-size:clamp(34px,8.2vh,64px)}
+ .view.swipe-compact .vote-btn{min-height:44px}
+ .view.swipe-compact .swipe-feedback{min-height:28px}
+ .view.swipe-compact .swipe-footer .btn{min-height:34px}
+ .view.swipe-compact .swipe-hint{display:none}
+}
+@media(max-height:570px){
+ .device{min-height:0}
+ .topbar{min-height:51px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:6px}
+ .view.swipe-compact .card-description{display:none}
+ .view.swipe-compact .swipe-card .tag{font-size:9px;padding:5px 6px}
+ .view.swipe-compact .swipe-card-stories{padding:5px 6px;font-size:9px}
+ .view.swipe-compact .feedback-label small{display:none}
+ .view.swipe-compact .card-title{font-size:clamp(17px,4.8vw,23px)}
+ .view.swipe-compact .swipe-buttons{margin:6px 0 3px}
+ .view.swipe-compact .swipe-footer .btn{min-height:30px;padding:4px 5px}
+ .bottom-nav{padding-top:4px;padding-bottom:max(4px,env(safe-area-inset-bottom))}
+ .nav-item{min-height:42px}
+}
+@media(prefers-reduced-motion:reduce){.view.swipe-compact .swipe-stage .swipe-card{animation:none!important}}
 </style>
 </head>
 <body>
