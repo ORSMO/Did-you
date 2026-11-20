@@ -49,3 +49,12 @@ Edit `index.html` and commit/push the change to `main`. With Render Auto-Deploy 
 ## Limitations / before production
 
 Add real accounts, a persistent backend/database, privacy controls, abuse reporting and moderation, spam prevention, age-appropriate policies, and server-side authorization before inviting users to post real data.
+### Swipe controls
+
+- **Swipe right / →:** Yes, I did
+- **Swipe left / ←:** No, I didn't
+- **Skip / ↓:** Move on without answering
+- **Undo / Z:** Reverse your most recent swipe
+- **Stories:** Read the community for the current card, or open the most recently answered question in the feedback strip.
+
+Answers are saved privately in your browser and the feed advances automatically after each answer.
