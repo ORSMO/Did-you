@@ -1,3 +1,13 @@
+## 2026-11-20 — Social profile glow-up (v1.2)
+
+- Added custom profile photos, display name, bio, Instagram link and website.
+- Added four color themes and a modern social profile header.
+- Added opt-in public-facing Did gallery with pinned experience highlights.
+- Added named stories and questions asked as profile tabs, plus a visitor preview.
+- Added quick Show/Hide controls in My Life and question communities.
+- Preserved private Yes/No answers and omitted anonymous stories from the profile preview.
+- Continued to use browser-only storage; no online accounts or photo syncing yet.
+
 ## 2026-11-20 — Smoother, faster swiping
 
 - Yes/No now animates directly to the next question without a results-screen interruption.
