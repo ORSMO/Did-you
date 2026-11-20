@@ -1,3 +1,12 @@
+## 2026-11-20 — Smoother, faster swiping
+
+- Yes/No now animates directly to the next question without a results-screen interruption.
+- Cards follow drag direction with a playful stamp, spring-back, and stacked next-card preview.
+- Recent swipe stays accessible via Stories, with one-tap Undo.
+- Keyboard controls: ← No, → Yes, ↓ Skip, Z Undo.
+- Optional haptic feedback on supported devices, with reduced-motion support.
+- Swipe progress and private answer saving remain visible.
+
 # Changelog
 
 All notable changes to the Did You? prototype are recorded here.
