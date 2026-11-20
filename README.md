@@ -1,3 +1,16 @@
+# Did You? — Android app first 📱
+
+**Current product:** a native **Android-only** phone app being prepared for Google Play.
+
+- [Android app source](./mobile/)
+- [Android installation and build instructions](./mobile/README.md)
+- [Google Play release checklist](./mobile/PLAY_RELEASE.md)
+- [Android source validation](https://github.com/ORSMO/Did-you/actions/workflows/android-check.yml)
+
+The original root `index.html` is a historical web prototype, not the intended public product. All new product development happens in `mobile/`. This app still needs a shared backend, security, moderation and real-device testing before its Play release.
+
+---
+
 # Did You? — Interactive Social App Prototype
 
 A mobile-friendly, single-page demo combining swipe-to-answer discovery with topic-based stories and discussions.
