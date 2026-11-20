@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+.expo-shared/
+android/
+*.keystore
+*.jks
+*.pem
+*.env
+.env*
+!.env.example
+*.log
+coverage/
+dist/
+web-build/
