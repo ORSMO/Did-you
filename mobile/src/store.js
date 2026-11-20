@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const STORE_KEY = 'didyou.android.prototype.v1';
 export const INITIAL = {
- answers:{}, saved:[], wishlist:[], myStories:{}, myReplies:{}, myQuestions:[], likes:[],
+ answers:{}, saved:[], wishlist:[], myStories:{}, myDiscussions:{}, myReplies:{}, myQuestions:[], likes:[],
  visibleDids:[], pinnedDids:[], hideDark:false,
  profile:{name:'Story Seeker',username:'storyseeker',bio:'Collecting moments, one “did you?” at a time ✨',instagram:'',photo:''}
 };
